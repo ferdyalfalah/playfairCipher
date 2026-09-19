@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Playfair Cipher - Cryptographic Console</title>
+    <meta name="description" content="Terminal Kriptografi Playfair Cipher 5x5 interaktif dengan visualisasi digrafik, animasi panah kurva luar, kustom matriks, dan analisis sandi klasik." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body class="dashboard-theme">
+    <!-- Top Terminal Navigation Bar -->
+    <header class="navbar">
+      <div class="nav-container">
+        <div class="brand-group">
+          <div class="brand-badge-terminal">
+            <span class="status-pulse"></span>
+            <span class="engine-code">PLAYFAIR//5x5</span>
+          </div>
+          <div>
+            <h1 class="brand-title">Playfair Cipher Workshop</h1>
+            <p id="brand-subtitle" class="brand-subtitle">Text Encryption &amp; Decryption</p>
+          </div>
+        </div>
+
+        <div class="nav-actions">
+          <!-- Language Switcher Toggle -->
+          <div class="lang-switch-group" title="Ubah Bahasa / Switch Language">
+            <button id="lang-id" class="btn-lang active" type="button">ID</button>
+            <span class="lang-divider">/</span>
+            <button id="lang-en" class="btn-lang" type="button">EN</button>
+          </div>
+
+          <!-- Theory / Materi Button -->
+          <button id="btn-about" class="btn-nav-tech" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            <span id="nav-about-text">Materi</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="page-container">
+      <!-- Upper Section: Input & Controls (2 Columns) -->
+      <div class="workspace-grid">
+        <!-- Left Column: Input Text & File Upload -->
+        <section class="card input-card">
+          <div class="card-header-row">
+            <div>
+              <div class="console-label-row">
+                <span class="console-tag">SRC_INPUT</span>
+                <h2 id="lbl-input-text" class="card-title">Input Text</h2>
+              </div>
+              <p id="lbl-input-desc" class="card-desc">Type text manually or load a plain text file.</p>
+            </div>
+            <button id="btn-clear" class="btn-text-action" type="button">Clear</button>
+          </div>
+
+          <div class="textarea-wrapper">
+            <textarea 
+              id="text-input" 
+              placeholder="Put your text to encrypt/decrypt here..." 
+              spellcheck="false"
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div class="input-meta-row">
+            <span id="source-indicator"><span class="terminal-prompt">&gt;</span> Manual input</span>
+            <span id="char-count" class="mono-stat">0 characters</span>
+          </div>
+
+          <!-- Divider -->
+          <div class="or-divider">
+            <span>OR LOAD FILE</span>
+          </div>
+
+          <!-- File Upload Box (Drag and Drop) -->
+          <div id="drop-zone" class="upload-dropzone">
+            <input type="file" id="file-input" accept=".txt" class="file-hidden" />
+            <div class="upload-icon-circle">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <p id="lbl-upload-title" class="upload-title">Upload .txt file</p>
+            <p id="lbl-upload-desc" class="upload-subtitle">Drag &amp; drop your file here or browse</p>
+            <button id="btn-browse-file" class="btn-pill" type="button">Choose File</button>
+          </div>
+
+          <!-- Action Buttons (Encrypt / Decrypt) -->
+          <div class="action-buttons-row">
+            <button id="btn-encrypt" class="btn-action btn-encrypt" type="button">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <span id="lbl-btn-encrypt">Encrypt</span>
+            </button>
+            <button id="btn-decrypt" class="btn-action btn-decrypt" type="button">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span id="lbl-btn-decrypt">Decrypt</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Right Column: Key, Utility, Matrix -->
+        <section class="controls-column">
+          <!-- Top Utility Buttons: Try Example & Reset -->
+          <div class="utility-buttons-row">
+            <button id="btn-try-example" class="btn-utility btn-example" type="button" title="Isi contoh teks & kunci">
+              <span class="btn-icon">&bull;</span>
+              <span id="lbl-try-example">Try example</span>
+            </button>
+            <button id="btn-reset" class="btn-utility btn-reset" type="button">
+              <span id="lbl-reset">Reset</span>
+            </button>
+          </div>
+
+          <!-- Key Card -->
+          <div class="card key-card">
+            <div class="field-label-row">
+              <label for="key-input" class="field-label">
+                <span class="console-tag tag-cyan">KEY_CONFIG</span>
+                <span id="lbl-key-title">Key</span> <span class="required-star">*</span>
+              </label>
+            </div>
+            <div class="input-with-icon">
+              <svg class="field-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="7.5" cy="15.5" r="5.5"></circle>
+                <path d="m21 2-9.6 9.6"></path>
+                <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+              </svg>
+              <input 
+                type="text" 
+                id="key-input" 
+                placeholder="Enter your keyword or key phrase..." 
+                autocomplete="off" 
+                spellcheck="false"
+              />
+            </div>
+            <p id="lbl-key-help" class="field-help">Used to generate the 5&times;5 Playfair matrix.</p>
+          </div>
+
+          <!-- Playfair Matrix Card -->
+          <div class="card matrix-card">
+            <div class="matrix-card-header">
+              <div>
+                <div class="console-label-row">
+                  <span class="console-tag tag-emerald">CIPHER_MATRIX</span>
+                  <h3 id="lbl-matrix-title" class="matrix-card-title">Playfair Matrix</h3>
+                </div>
+                <p id="lbl-matrix-sub" class="matrix-card-subtitle">I / J are combined</p>
+              </div>
+              <div class="matrix-header-right">
+                <span class="badge-dim">5 &times; 5</span>
+                <button id="btn-toggle-custom" class="btn-custom-toggle" type="button" title="Toggle edit mode for non-key cells">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  <span id="custom-matrix-label">Kustom Grid</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Matrix Body: Either Empty Placeholder or 5x5 Grid -->
+            <div id="matrix-wrapper" class="matrix-wrapper">
+              <div id="matrix-empty-state" class="matrix-empty-state">
+                <div class="matrix-empty-icon">[ 5 &times; 5 ]</div>
+                <p id="lbl-matrix-empty">Enter a key to generate your matrix.</p>
+              </div>
+              <div id="matrix-grid-container" class="matrix-grid-container hidden">
+                <div id="matrix-grid" class="matrix-grid">
+                  <!-- 25 Cells rendered dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <div class="matrix-footer">
+              <p id="matrix-footer-note" class="field-help">The matrix is generated automatically from the provided key.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Result Section (Appears after transformation) -->
+      <section id="result-section" class="card result-card hidden">
+        <div class="result-header">
+          <div>
+            <div class="console-label-row">
+              <span class="console-tag tag-cyan">OUTPUT_STREAM</span>
+              <h2 id="lbl-result-title" class="result-title">Result</h2>
+            </div>
+            <p id="lbl-result-sub" class="result-subtitle">Your transformed text will appear here.</p>
+          </div>
+          <span id="result-badge" class="badge-status">ENCRYPTED</span>
+        </div>
+
+        <div class="result-meta-row">
+          <span><span id="lbl-meta-file">File</span>: <strong id="meta-file">Manual Input</strong></span>
+          <span><span id="lbl-meta-op">Operation</span>: <strong id="meta-operation">Encryption</strong></span>
+          <span><span id="lbl-meta-char">Characters</span>: <strong id="meta-chars">0</strong></span>
+        </div>
+
+        <div class="result-box-wrapper">
+          <div id="result-text" class="result-text-box"></div>
+        </div>
+
+        <div class="result-actions-row">
+          <button id="btn-copy-result" class="btn-result-action" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span id="copy-btn-text">Copy</span>
+          </button>
+          <button id="btn-download-result" class="btn-result-action" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span id="lbl-btn-download">Download .txt</span>
+          </button>
+          <button id="btn-share-result" class="btn-result-action" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            <span id="lbl-btn-share">Share</span>
+          </button>
+          <button id="btn-use-as-input" class="btn-result-action btn-swap" type="button" title="Gunakan hasil ini sebagai teks input baru">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="17 1 21 5 17 9"></polyline>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <polyline points="7 23 3 19 7 15"></polyline>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+            <span id="lbl-btn-use-input">Use as Input</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Learn By Doing - Transformation Section -->
+      <section id="learn-section" class="card learn-card hidden">
+        <div class="learn-header">
+          <span id="lbl-learn-tag" class="learn-tag">LEARN BY DOING</span>
+          <h2 id="lbl-learn-title" class="learn-title">Transformation</h2>
+          <p id="lbl-learn-sub" class="learn-subtitle">Follow one character pair at a time through the key matrix.</p>
+        </div>
+
+        <div class="learn-body">
+          <!-- Step Navigator Row -->
+          <div class="step-nav-row">
+            <div class="step-pair-badge-group">
+              <span id="step-pair-label" class="step-pair-count">PAIR 1 OF 10</span>
+              <div class="pair-chips-display">
+                <span id="chip-in-pair" class="chip-pair chip-input">TE</span>
+                <span class="chip-arrow">&rarr;</span>
+                <span id="chip-out-pair" class="chip-pair chip-output">ZB</span>
+              </div>
+            </div>
+
+            <div class="step-controls">
+              <button id="btn-prev-step" class="btn-step-nav" type="button">&larr; Previous</button>
+              <button id="btn-play-step" class="btn-step-nav btn-play" type="button">
+                <span id="play-icon">&rtrif;</span> <span id="play-label">Auto Play</span>
+              </button>
+              <button id="btn-next-step" class="btn-step-nav" type="button">Next &rarr;</button>
+            </div>
+          </div>
+
+          <!-- Visualizer Grid: Matrix with SVG Outer Arching Arrows & Rule Card -->
+          <div class="visualizer-container">
+            <!-- Visual Matrix with SVG Arrow Overlay -->
+            <div class="visual-matrix-area">
+              <div class="matrix-canvas-wrapper" id="matrix-canvas-wrapper">
+                <div id="learn-matrix-grid" class="learn-matrix-grid">
+                  <!-- 25 Cells with coordinates -->
+                </div>
+                <!-- SVG Canvas with expanded overflow for outer arching paths -->
+                <svg id="arrow-canvas" class="arrow-canvas" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <!-- Marker Arrowhead Primary (Deep Emerald #085D4A) -->
+                    <marker id="arrowhead-primary" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#085D4A" />
+                    </marker>
+                    <!-- Marker Arrowhead Secondary (Warm Gold #C29D53) -->
+                    <marker id="arrowhead-secondary" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#C29D53" />
+                    </marker>
+                    <!-- Legacy Fallbacks pointing forward along tangent -->
+                    <marker id="arrowhead-down" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#085D4A" />
+                    </marker>
+                    <marker id="arrowhead-up" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#C29D53" />
+                    </marker>
+                    <marker id="arrowhead-right" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#085D4A" />
+                    </marker>
+                    <marker id="arrowhead-left" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#C29D53" />
+                    </marker>
+                  </defs>
+                  <g id="guide-layer"></g>
+                  <g id="arrow-layer"></g>
+                </svg>
+              </div>
+
+              <!-- Matrix Visual Legend -->
+              <div class="visual-legend">
+                <span class="legend-item"><span class="legend-circle dot-input"></span> <span id="lbl-legend-in">Input</span></span>
+                <span class="legend-item"><span class="legend-circle dot-output"></span> <span id="lbl-legend-out">Output</span></span>
+                <span class="legend-item"><span class="legend-circle dot-both"></span> <span id="lbl-legend-both">Both</span></span>
+              </div>
+            </div>
+
+            <!-- Rule Explanation Sidebox -->
+            <div class="rule-box">
+              <span id="rule-badge" class="rule-badge">SAME COLUMN RULE</span>
+              <div class="rule-pair-display">
+                <span id="rule-in-pair" class="chip-pair chip-input">TE</span>
+                <span class="chip-arrow">&rarr;</span>
+                <span id="rule-out-pair" class="chip-pair chip-output">ZB</span>
+              </div>
+              <p id="rule-explanation-desc" class="rule-desc">
+                The arrows show each input character moving to its output cell.
+              </p>
+              <div id="rule-detailed-note" class="rule-note"></div>
+            </div>
+          </div>
+
+          <!-- Collapsible Transformations List -->
+          <div class="transformations-accordion">
+            <button id="btn-toggle-all-pairs" class="accordion-toggle" type="button">
+              <span id="accordion-arrow">&blacktriangledown;</span>
+              <span id="accordion-label">View all transformations</span>
+            </button>
+            <div id="all-pairs-container" class="all-pairs-grid">
+              <!-- Pair badges dynamically generated -->
+            </div>
+          </div>
+
+          <p id="lbl-learn-bottom" class="learn-bottom-note">The selected pair follows the row, column, or rectangle rule shown in the matrix.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal Theory / Materi Dialog -->
+    <div id="about-modal" class="modal-backdrop hidden">
+      <div class="modal-card about-modal-large">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <div class="brand-badge-terminal small-terminal-badge">
+              <span>DOC//THEORY</span>
+            </div>
+            <div>
+              <h3 id="about-modal-title">Playfair Cipher - Materi &amp; Panduan Teori</h3>
+              <p id="about-modal-sub" class="modal-sub">Konsep, Struktur Matriks 5&times;5, dan Aturan Kriptografi Klasik</p>
+            </div>
+          </div>
+          <button id="btn-close-modal" class="btn-close" aria-label="Close">&times;</button>
+        </div>
+
+        <!-- Navigation Tabs Inside Modal -->
+        <div class="modal-tabs">
+          <button class="modal-tab-btn active" data-tab="tab-theory" id="tab-btn-theory"><span id="tab-lbl-theory">Teori &amp; Sejarah</span></button>
+          <button class="modal-tab-btn" data-tab="tab-matrix" id="tab-btn-matrix"><span id="tab-lbl-matrix">Matriks 5&times;5</span></button>
+          <button class="modal-tab-btn" data-tab="tab-prep" id="tab-btn-prep"><span id="tab-lbl-prep">Pra-Pemrosesan</span></button>
+          <button class="modal-tab-btn" data-tab="tab-rules" id="tab-btn-rules"><span id="tab-lbl-rules">Aturan Transformasi</span></button>
+        </div>
+
+        <div class="modal-tab-viewport">
+          <div id="modal-tab-track" class="modal-tab-track">
+            <!-- Tab 1: Teori & Sejarah -->
+            <div id="tab-theory" class="tab-pane active" data-tab-index="0">
+              <div class="tab-scroll-inner">
+                <h4 class="tab-section-heading" id="about-h-history">Sejarah dan Konsep Dasar</h4>
+                <p id="about-p-history1">
+                  <strong>Playfair Cipher</strong> adalah teknik enkripsi simetris manual pertama yang menggunakan metode <em>substitusi digrafik</em> (memproses pasangan dua huruf sekaligus), bukan substitusi huruf tunggal seperti sandi Caesar atau sandi substitusi monoalfabetik lainnya.
+                </p>
+                <div class="info-callout">
+                  <p id="about-p-history2">
+                    Diciptakan oleh <strong>Sir Charles Wheatstone</strong> pada tahun 1854, sandi ini dinamai menurut temannya, <strong>Lord Playfair</strong>, yang giat mempromosikan penggunaannya untuk kepentingan militer dan diplomasi Kerajaan Inggris (digunakan pada Perang Boer Kedua dan Perang Dunia I).
+                  </p>
+                </div>
+                <h4 class="tab-section-heading" id="about-h-advantage">Keunggulan Kriptografi</h4>
+                <p id="about-p-advantage">
+                  Dengan mengenkripsi 2 huruf sekaligus (digraf), terdapat <strong>25 &times; 25 = 625 kemungkinan pasangan huruf</strong>. Hal ini meratakan kurva frekuensi kemunculan huruf sehingga analisis frekuensi huruf tunggal menjadi jauh lebih sulit dilakukan oleh pihak ketiga.
+                </p>
+              </div>
+            </div>
+
+            <!-- Tab 2: Struktur Matriks 5x5 -->
+            <div id="tab-matrix" class="tab-pane" data-tab-index="1">
+              <div class="tab-scroll-inner">
+                <h4 class="tab-section-heading" id="about-h-matrix">Penyusunan Matriks 5&times;5</h4>
+                <p id="about-p-matrix1">
+                  Playfair Cipher menggunakan kisi berukuran <strong>5 baris &times; 5 kolom</strong> yang menampung 25 huruf alfabet (alfabet Latin berjumlah 26 huruf, sehingga huruf <strong>'I' dan 'J' digabungkan</strong> ke dalam satu sel yang sama).
+                </p>
+                <div class="steps-box">
+                  <div class="step-box-item">
+                    <span class="step-number">1</span>
+                    <div>
+                      <strong id="about-step1-t">Masukkan Kata Kunci:</strong>
+                      <p id="about-step1-d">Hilangkan spasi dan huruf ganda dari kata kunci. Masukkan huruf-huruf unik tersebut ke dalam matriks dari kiri ke kanan, mulai dari baris pertama.</p>
+                    </div>
+                  </div>
+                  <div class="step-box-item">
+                    <span class="step-number">2</span>
+                    <div>
+                      <strong id="about-step2-t">Lengkapi Sisa Alfabet:</strong>
+                      <p id="about-step2-d">Isi sel-sel yang masih kosong dengan sisa huruf alfabet yang belum digunakan (A sampai Z, tanpa huruf J) secara berurutan.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="example-box">
+                  <strong id="about-mat-ex-t">Contoh Matriks dengan Kunci "MONARCHY":</strong>
+                  <pre class="matrix-preview-pre">
+M  O  N  A  R
+C  H  Y  B  D
+E  F  G  I  K
+L  P  Q  S  T
+U  V  W  X  Z</pre>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 3: Pra-Pemrosesan Teks -->
+            <div id="tab-prep" class="tab-pane" data-tab-index="2">
+              <div class="tab-scroll-inner">
+                <h4 class="tab-section-heading" id="about-h-prep">Aturan Pra-Pemrosesan Teks (Plaintext Preparation)</h4>
+                <p id="about-p-prep1">Sebelum teks dienkripsi, teks harus disiapkan mengikuti 4 aturan baku:</p>
+                <ul class="modal-list">
+                  <li>
+                    <strong id="about-prep-r1-t">Normalisasi Teks:</strong>
+                    <span id="about-prep-r1-d">Ubah semua huruf ke huruf kapital. Hapus semua spasi, angka, dan tanda baca. Ganti semua huruf 'J' menjadi 'I'.</span>
+                  </li>
+                  <li>
+                    <strong id="about-prep-r2-t">Pembentukan Digraf (Pasangan 2 Huruf):</strong>
+                    <span id="about-prep-r2-d">Bagi teks menjadi pasangan dua huruf (misal: "SECURITY" &rarr; "SE", "CU", "RI", "TY").</span>
+                  </li>
+                  <li>
+                    <strong id="about-prep-r3-t">Penanganan Huruf Kembar dalam Pasangan:</strong>
+                    <span id="about-prep-r3-d">Jika ada dua huruf yang sama dalam satu digraf yang sama (misal "LL" pada "BALLOON"), sisipkan huruf pengisi 'X' di antara keduanya. Contoh: "BA", "LX", "LO", "ON". Jika huruf kembarnya adalah 'X', gunakan pemisah 'Q'.</span>
+                  </li>
+                  <li>
+                    <strong id="about-prep-r4-t">Panjang Teks Harus Genap:</strong>
+                    <span id="about-prep-r4-d">Jika setelah digabungkan panjang teks ganjil, tambahkan huruf pengisi 'X' di akhir teks (atau 'Q' jika karakter terakhir adalah 'X').</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Tab 4: Aturan Enkripsi & Dekripsi -->
+            <div id="tab-rules" class="tab-pane" data-tab-index="3">
+              <div class="tab-scroll-inner">
+                <h4 class="tab-section-heading" id="about-h-rules">3 Aturan Inti Transformasi Digraf</h4>
+                <div class="rule-card-item">
+                  <div class="rule-card-header">
+                    <span class="rule-tag tag-row">RULE 1</span>
+                    <strong id="about-r1-title">Aturan Baris Sama (Same Row Rule)</strong>
+                  </div>
+                  <p id="about-r1-desc">
+                    Jika kedua huruf berada di <strong>baris yang sama</strong>:
+                  </p>
+                  <ul class="inner-rule-list">
+                    <li><strong id="about-r1-enc">Enkripsi:</strong> <span id="about-r1-enc-d">Gantikan masing-masing huruf dengan huruf di sebelah kanannya (geser 1 kolom ke kanan). Jika sudah di kolom paling kanan (kolom ke-5), berputar (wrap-around) ke kolom paling kiri (kolom ke-1).</span></li>
+                    <li><strong id="about-r1-dec">Dekripsi:</strong> <span id="about-r1-dec-d">Gantikan masing-masing huruf dengan huruf di sebelah kirinya (geser 1 kolom ke kiri). Wrap-around ke kolom paling kanan jika di kolom ke-1.</span></li>
+                  </ul>
+                </div>
+
+                <div class="rule-card-item">
+                  <div class="rule-card-header">
+                    <span class="rule-tag tag-col">RULE 2</span>
+                    <strong id="about-r2-title">Aturan Kolom Sama (Same Column Rule)</strong>
+                  </div>
+                  <p id="about-r2-desc">
+                    Jika kedua huruf berada di <strong>kolom yang sama</strong>:
+                  </p>
+                  <ul class="inner-rule-list">
+                    <li><strong id="about-r2-enc">Enkripsi:</strong> <span id="about-r2-enc-d">Gantikan masing-masing huruf dengan huruf tepat di bawahnya (geser 1 baris ke bawah). Jika di baris paling bawah, berputar ke baris paling atas.</span></li>
+                    <li><strong id="about-r2-dec">Dekripsi:</strong> <span id="about-r2-dec-d">Gantikan masing-masing huruf dengan huruf tepat di atasnya (geser 1 baris ke atas). Berputar ke baris paling bawah jika di baris paling atas.</span></li>
+                  </ul>
+                </div>
+
+                <div class="rule-card-item">
+                  <div class="rule-card-header">
+                    <span class="rule-tag tag-rect">RULE 3</span>
+                    <strong id="about-r3-title">Aturan Sudut Persegi (Rectangle Rule)</strong>
+                  </div>
+                  <p id="about-r3-desc">
+                    Jika kedua huruf berada di <strong>baris dan kolom yang berbeda</strong>, keduanya membentuk sudut persegi panjang imajiner pada matriks:
+                  </p>
+                  <ul class="inner-rule-list">
+                    <li><strong id="about-r3-both">Enkripsi &amp; Dekripsi:</strong> <span id="about-r3-both-d">Huruf pertama digantikan oleh huruf yang sebaris dengannya tetapi berada pada kolom huruf kedua. Huruf kedua digantikan oleh huruf yang sebaris dengannya pada kolom huruf pertama.</span></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-modal-gotit" class="btn-pill btn-primary-pill" type="button">Mengerti / Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
